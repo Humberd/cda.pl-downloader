@@ -2,7 +2,7 @@ import puppeteer from 'puppeteer';
 import { execSync } from 'child_process';
 
 // a PATH to a json file with seasons
-const PATH = '../pokemon.json';
+const PATH = '../seasons.json';
 
 // time to wait between requests to prevent blocking by the server
 const WAIT_TIME_MS = 3000;
