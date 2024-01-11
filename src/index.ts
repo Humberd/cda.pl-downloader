@@ -1,17 +1,135 @@
 import puppeteer from 'puppeteer';
-// import { execSync, exec } from 'child_process';
-// import fs from 'fs';
-// import path from 'path';
+import { execSync, exec } from 'child_process';
+import fs from 'fs';
+import path from 'path';
 
-async function scrapeEpisodeLinks(pageUrl: string): Promise<string[]> {
+const seasons: Season[] = [
+  // {
+  //   "link": "https://www.cda.pl/Rakso_98/folder/35223597",
+  //   "title": "Pokemon Filmy"
+  // },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223606',
+    'title': 'Pokemon Sezon 01 (Indigo League)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223618',
+    'title': 'Pokemon Sezon 02 (Adventures on the Orange Islands)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223624',
+    'title': 'Pokemon Sezon 03 (Johto Journeys)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223630',
+    'title': 'Pokemon Sezon 04 (Johto Champions League)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223633',
+    'title': 'Pokemon Sezon 05 (Master Quest)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223639',
+    'title': 'Pokemon Sezon 06 (Advanced)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223648',
+    'title': 'Pokemon Sezon 07 (Advanced Challenge)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223654',
+    'title': 'Pokemon Sezon 08 (Advanced Battle)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223819',
+    'title': 'Pokemon Sezon 09 (Battle Frontier)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223822',
+    'title': 'Pokemon Sezon 10 (Diament i Perła)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223834',
+    'title': 'Pokemon Sezon 11 (Wymiary Walki)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223843',
+    'title': 'Pokemon Sezon 12 (Galaktyczne Bitwy)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223846',
+    'title': 'Pokemon Sezon 13 (Gwiazdy Ligi Sinnoh)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223855',
+    'title': 'Pokemon Sezon 14 (Czerń i Biel)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223864',
+    'title': 'Pokemon Sezon 15 (Czerń i Biel: Ścieżki Przeznaczenia)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223876',
+    'title': 'Pokemon Sezon 16 (Czerń i Biel: Przygody w Unovie i nie tylko)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223888',
+    'title': 'Pokemon Sezon 17 (Seria: XY)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223900',
+    'title': 'Pokemon Sezon 18 (Seria: XY: Przygody w Kalos)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223903',
+    'title': 'Pokemon Sezon 19 (Seria: XYZ)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223918',
+    'title': 'Pokemon Sezon 20 (Słońce i Księżyc)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223927',
+    'title': 'Pokemon Sezon 21 (Słońce i Księżyc: Ultra Przygody)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223939',
+    'title': 'Pokemon Sezon 22 (Słońce i Księżyc: Ultra Legendy)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/35223942',
+    'title': 'Pokemon Sezon 23 (Seria: Podróże)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/40021670',
+    'title': 'Pokemon Sezon 24 (Seria: Podróże Mistrzów)',
+  },
+  {
+    'link': 'https://www.cda.pl/Rakso_98/folder/40039187',
+    'title': 'Pokemon Sezon 25 (Seria: Najwspanialsze podróże)',
+  },
+];
+
+interface Season {
+  link: string;
+  title: string;
+}
+
+async function scrapeEpisodeLinks(season: Season): Promise<string[]> {
   const browser = await puppeteer.launch({ headless: 'new' });
   const page = await browser.newPage();
   const links: string[] = [];
 
+  let pageUrl = season.link;
+  // Extract the domain from the page URL
+  const urlObject = new URL(pageUrl);
+  const domain = urlObject.origin;
+
   do {
     await page.goto(pageUrl);
     const episodeLinks = await page.$$eval('.thumb-wrapper-just .list-when-small a.link-title-visit', elems => elems.map(e => e.getAttribute('href')));
-    links.push(...episodeLinks);
+    const fullEpisodeLinks = episodeLinks.map(link => `${domain}${link}`);
+    links.push(...fullEpisodeLinks);
 
     const nextPage = await page.$('.paginationControl>a');
     if (nextPage) {
@@ -25,14 +143,62 @@ async function scrapeEpisodeLinks(pageUrl: string): Promise<string[]> {
   return links;
 }
 
-async function main() {
-  const seasons = [
-      "https://www.cda.pl/Rakso_98/folder/35223606"
-  ]
-
-  const links = await scrapeEpisodeLinks(seasons[0]);
-  console.log(links);
-  console.log(links.length);
+function download(episodeLink: string, season: Season): void {
+  const command = `yt-dlp -P "data/${season.title}"  ${episodeLink}`;
+  try {
+    execSync(command, { stdio: 'inherit' });
+    console.log(`Downloaded successfully: ${episodeLink}`);
+  } catch (error) {
+    console.error(`Error downloading:`, error);
+  }
 }
 
-main();
+async function downloadSeason(season: Season): Promise<void> {
+  const episodeLinks = await scrapeEpisodeLinks(season);
+  for (const episodeLink of episodeLinks) {
+    download(episodeLink, season);
+  }
+}
+
+async function executeMaxXCallbacks(callbacks: Array<() => Promise<any>>, maxConcurrent: number): Promise<void> {
+  // Guard against invalid maxConcurrent values
+  if (maxConcurrent < 1) throw new Error('maxConcurrent must be at least 1');
+
+  // Function to execute a single callback
+  const executeCallback = async (callback: () => Promise<any>) => {
+    try {
+      await callback();
+    } catch (error) {
+      console.error('Error executing callback:', error);
+    }
+  };
+
+  // Array to keep track of current executing promises
+  const executing: Promise<any>[] = [];
+
+  for (const callback of callbacks) {
+    // If the number of executing promises reaches the max, wait for one to finish
+    if (executing.length >= maxConcurrent) {
+      await Promise.race(executing);
+    }
+
+    // Start a new callback and add its promise to the executing array
+    const p = executeCallback(callback).then(() => {
+      // Once the callback is finished, remove it from the executing array
+      executing.splice(executing.indexOf(p), 1);
+    });
+    executing.push(p);
+  }
+
+  // Wait for all remaining callbacks to finish
+  await Promise.all(executing);
+}
+
+async function main(seasons: Season[], maxConcurrentDownloads: number): Promise<void> {
+  for (const season of seasons) {
+    console.log(`Downloading season: ${season.title}`);
+    await downloadSeason(season);
+  }
+}
+
+main(seasons, 3);
