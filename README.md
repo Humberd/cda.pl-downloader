@@ -12,7 +12,7 @@ THe downloader resumes in a place in case of an error or if the script is stoppe
 
 ## Requirements
 - Node.js [https://nodejs.org/en/](https://nodejs.org/en/)
-- yt-dlp [https://github.com/yt-dlp/yt-dlp/releases/tag/2023.12.30](https://github.com/yt-dlp/yt-dlp/releases/tag/2023.12.30)
+- yt-dlp [https://github.com/yt-dlp/yt-dlp/releases/latest](https://github.com/yt-dlp/yt-dlp/releases/latest)
 
 ## Installation
 1. Clone this repository: `git clone <repo_url>`
