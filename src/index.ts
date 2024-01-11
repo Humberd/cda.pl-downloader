@@ -155,7 +155,7 @@ async function downloadSeason(season: Season): Promise<void> {
   const episodeLinks = await scrapeEpisodeLinks(season);
   for (const episodeLink of episodeLinks) {
     // to prevent blocking by the server
-    await wait(1000);
+    await wait(3000);
     download(episodeLink, season);
   }
 }
