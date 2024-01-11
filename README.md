@@ -8,6 +8,7 @@ The episodes are in Polish.
 To download this script uses `yt-dlp` which is a fork of `youtube-dl` with some extra features.
 The episodes are downloaded in the best quality available.
 The episodes are downloaded sequentially, so it might take a while.
+THe downloader resumes in a place in case of an error or if the script is stopped.
 
 ## Requirements
 - Node.js [https://nodejs.org/en/](https://nodejs.org/en/)
