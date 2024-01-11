@@ -154,8 +154,14 @@ function download(episodeLink: string, season: Season): void {
 async function downloadSeason(season: Season): Promise<void> {
   const episodeLinks = await scrapeEpisodeLinks(season);
   for (const episodeLink of episodeLinks) {
+    // to prevent blocking by the server
+    await wait(1000);
     download(episodeLink, season);
   }
+}
+
+async function wait(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function main(seasons: Season[], maxConcurrentDownloads: number): Promise<void> {
