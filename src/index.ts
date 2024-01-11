@@ -1,13 +1,11 @@
 import puppeteer from 'puppeteer';
-import { execSync, exec } from 'child_process';
-import fs from 'fs';
-import path from 'path';
+import { execSync } from 'child_process';
 
 const seasons: Season[] = [
-  // {
-  //   "link": "https://www.cda.pl/Rakso_98/folder/35223597",
-  //   "title": "Pokemon Filmy"
-  // },
+  {
+    "link": "https://www.cda.pl/Rakso_98/folder/35223597",
+    "title": "Pokemon Filmy"
+  },
   {
     'link': 'https://www.cda.pl/Rakso_98/folder/35223606',
     'title': 'Pokemon Sezon 01 (Indigo League)',
@@ -158,40 +156,6 @@ async function downloadSeason(season: Season): Promise<void> {
   for (const episodeLink of episodeLinks) {
     download(episodeLink, season);
   }
-}
-
-async function executeMaxXCallbacks(callbacks: Array<() => Promise<any>>, maxConcurrent: number): Promise<void> {
-  // Guard against invalid maxConcurrent values
-  if (maxConcurrent < 1) throw new Error('maxConcurrent must be at least 1');
-
-  // Function to execute a single callback
-  const executeCallback = async (callback: () => Promise<any>) => {
-    try {
-      await callback();
-    } catch (error) {
-      console.error('Error executing callback:', error);
-    }
-  };
-
-  // Array to keep track of current executing promises
-  const executing: Promise<any>[] = [];
-
-  for (const callback of callbacks) {
-    // If the number of executing promises reaches the max, wait for one to finish
-    if (executing.length >= maxConcurrent) {
-      await Promise.race(executing);
-    }
-
-    // Start a new callback and add its promise to the executing array
-    const p = executeCallback(callback).then(() => {
-      // Once the callback is finished, remove it from the executing array
-      executing.splice(executing.indexOf(p), 1);
-    });
-    executing.push(p);
-  }
-
-  // Wait for all remaining callbacks to finish
-  await Promise.all(executing);
 }
 
 async function main(seasons: Season[], maxConcurrentDownloads: number): Promise<void> {
